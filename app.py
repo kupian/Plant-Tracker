@@ -52,7 +52,7 @@ def register():
         password = request.form.get("password")
         confirmation = request.form.get("confirmation")
         if len(username) < 1:
-            return {"response" :"Username not valid"}
+            return {"response" : "Username not valid"}
             # return username not valid
         if password != confirmation:
             #todo return passwords dont match
