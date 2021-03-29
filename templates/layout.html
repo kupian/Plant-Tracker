@@ -23,9 +23,9 @@
                     let navuser = document.querySelector("#navuser")
                 
                     {% if username %}   
-                        navuser.innerHTML = "<h3>{{username}}</h3>"                  
+                        navuser.innerHTML = '<h3>{{username}}</h3><div></form><form action="/logout" method="get"><button class="btn btn-secondary" type="submit">Log Out</button></form></div>'                  
                     {% else %}
-                        navuser.innerHTML = '<form action="/login" method="post" class="d-flex"><div><input class="form-control" type="text" name="username" placeholder="Username"></div><div><input class="form-control" type="password" name="password" placeholder="Password"></div><button class="btn btn-primary" type="submit">Log In</button><div></form><form action="/register" method="get"><button class="btn btn-secondary" type="submit">Register</button></form></div>'
+                        navuser.innerHTML = '<form id="login" action="/login" method="post" class="d-flex"><div><input class="form-control" type="text" id="l_username" name="l_username" placeholder="Username"></div><div><input class="form-control" id="l_password" type="password" name="l_password" placeholder="Password"></div><button class="btn btn-primary" type="submit">Log In</button><div></form><form action="/register" method="get"><button class="btn btn-secondary" type="submit">Register</button></form></div>'
                     {% endif %}             
                 </script>
             </div>  

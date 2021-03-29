@@ -30,8 +30,8 @@ def main():
 @app.route("/login", methods=["GET", "POST"])
 def login():
     if request.method == "POST":
-        username = request.form.get("username")
-        password = request.form.get("password")
+        username = request.form.get("l_username")
+        password = request.form.get("l_password")
         with connect("plantapp.db") as con:
             db = con.cursor()
             query = db.execute("SELECT password FROM users WHERE username = ?", [username])
@@ -47,33 +47,37 @@ def login():
 @app.route("/register", methods=["GET", "POST"])
 def register():
     if request.method == "POST":
-        email = request.form.get("email")
-        username = request.form.get("username")
-        password = request.form.get("password")
-        confirmation = request.form.get("confirmation")
+        email = request.form.get("r_email")
+        username = request.form.get("r_username")
+        password = request.form.get("r_password")
+        confirmation = request.form.get("r_confirmation")
         if len(username) < 1:
             return {"response" : "Username not valid"}
             # return username not valid
         if password != confirmation:
             #todo return passwords dont match
-            return redirect("/register")
+            return {"response" : "Passwords do not match"}
         with connect("plantapp.db") as con:
             db = con.cursor()
             passhash = generate_password_hash(password)
             query = db.execute("SELECT username FROM users WHERE username = ?", [username])
             for row in query:
                 if row[0] == username:
-                    return redirect("/register")
                     # todo return username exists
+                    return {"response" : "Username already registered"}
             query = db.execute("SELECT email FROM users WHERE email = ?", [email])
             for row in query:
                 if row[0] == email:
-                    return redirect("/register")
                     #todo return email exists
+                    return {"response" : "Email already registered"}
             query = db.execute("INSERT INTO users (username, email, password) VALUES (?, ?, ?)", [username, email, passhash])
-            con.commit()
-            return json.dumps({'status': 'OK'})
-            return redirect("/login")
+            con.commit()   
+        return {"response": "OK"}           
     else:
         session.clear()
         return render_template("register.html")
+
+@app.route("/logout")
+def logout():
+    session.clear()
+    return redirect("/")
