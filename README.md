@@ -1,1 +1,3 @@
-###
+### Plant Tracker by Alex Carr https://github.com/alexcarr1113
+### This web application allows you to lookup and enter your currently growing plants and important information about them. The app will then allow you to keep track of plants you are
+### growing and what you need to know about them. It will also generate a calendar that can be used to remind you when to water & harvest your plants etc.
