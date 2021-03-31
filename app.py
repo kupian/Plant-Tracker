@@ -92,13 +92,17 @@ def logout():
 def plants():
     if request.method == "GET":
         plants = []
+        plantNames = []
         with connect("plantapp.db") as con: # Select plants that user is growing
             db = con.cursor()
-            query = db.execute("SELECT name FROM plants WHERE plantid IN (SELECT plantid FROM plantgrowth WHERE username=?)", [session["username"]])
+            query = db.execute("SELECT plantid FROM plantgrowth WHERE username=?", [session["username"]])
             for row in query:
                 plants.append(row[0])
+            for plantid in plants:
+                query = db.execute("SELECT name FROM plants WHERE plantid = ?", [plantid])
+                plantNames.append(query.fetchall()[0][0])
             con.commit()
-        return render_template("plants.html", plants=plants, username=session["username"])
+        return render_template("plants.html", plants=plantNames, username=session["username"])
     else:
         plant = request.form.get("planttype") # Get plant name from form
         if len(plant) < 1: # Check name is valid
