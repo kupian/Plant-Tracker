@@ -20,12 +20,17 @@
 
             </div>
             <div class="col-sm">
-                <form class="form" id="popup">
-                        <div>
-                            <input class="form-control" type="text" name="planttype" placeholder="Plant Type" id="plantsearch">
+                <form class="form" id="popup" action="/plants" method="POST">
+                    <div class="form-group-row">
+                        <div class="mb-3 col-sm">
+                            <input class="form-control" type="text" name="planttype" autocomplete="off" placeholder="Plant Type" id="plantsearch">
                         </div>
-                        <div class="mb-3" id="options">
+                       <div class="mb-3 col-sm text-center" id="options">
                         </div>
+                        <div class="mb-3 col-sm">
+                            <button class="btn btn-primary form-control" type="submit">Add Plant</button>
+                       </div>       
+                    </div>     
                 </form>
             </div>
             <div class="col-sm">
@@ -55,30 +60,40 @@
 
     <script>
 
-        function showOptions(json) {
+        function showOptions(json) { // Get all plant names and add buttons to form
             for (let i = 0; i < json["response"].length; i++) {
                 let name = json["response"][i]["name"];
-                $("#options").append(" <button class='mt-3 form-control' type='button'>" + name + "</button>");
+                $("#options").append(" <button class='mb-3 btn btn-success' type='button'>" + name + "</button>");
             }
         }
 
-        $(document).ready(function() {
+        $(document).ready(function() { // When document loaded
 
-            $(".plantoption").click(function(){
-                console.log("click");
+            $(document).click(function() { // If search bar unselected hide options
+                if (event.target.id != "plantsearch")
+                {
+                    $("#options").css('display', 'none');
+                }
+            })
+
+            $("#options").click(function(){ // If option clicked set form value, empty and hide options
+                $("#plantsearch").val($(event.target).html());
+                $("#options").empty();
                 $("#options").css('display', 'none');
             })
 
-            $("#plantsearch").keyup(function() {
+            $("#plantsearch").click(function(){ // If search bar clicked display options
+                $("#options").css('display', 'inline-block');
+            })
+
+            $("#plantsearch").keyup(function() { // Make ajax call on each keypress unless string is empty in which case empty option list
                 if ($("#plantsearch").val().length == 0)
                 {
-                    console.log("eee");
                     $("#options").empty();
                     $("#options").css('display', 'none');
                 }
                 else {
                     $("#options").css('display', 'inline-block');
-                    $(".form-control").css('display', 'block');
                     $.ajax({
                     url: '/searchplants',
                     type: 'POST',

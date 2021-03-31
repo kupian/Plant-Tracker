@@ -81,6 +81,7 @@ def register():
         session.clear()
         return render_template("register.html")
 
+# Clear session dict on logout
 @app.route("/logout")
 def logout():
     session.clear()
@@ -91,26 +92,36 @@ def logout():
 def plants():
     if request.method == "GET":
         plants = []
-        with connect("plantapp.db") as con:
+        with connect("plantapp.db") as con: # Select plants that user is growing
             db = con.cursor()
-            query = db.execute("SELECT name FROM plants WHERE plantid = (SELECT plantid FROM plantgrowth WHERE username=?)", [session["username"]])
+            query = db.execute("SELECT name FROM plants WHERE plantid IN (SELECT plantid FROM plantgrowth WHERE username=?)", [session["username"]])
             for row in query:
-                plants.append(row)
+                plants.append(row[0])
             con.commit()
         return render_template("plants.html", plants=plants, username=session["username"])
     else:
-        return redirect("/")
+        plant = request.form.get("planttype") # Get plant name from form
+        if len(plant) < 1: # Check name is valid
+            return redirect("/plants")
+        with connect("plantapp.db") as con:
+            db = con.cursor()
+            query = db.execute("SELECT plantid FROM plants WHERE name = ?", [plant]) 
+            if query.fetchall() == []: # Check to see if plant name already exists in DB
+                db.execute("INSERT INTO plants (name) VALUES (?)", [plant]) # If no, insert plant into DB
+                con.commit()
+            db.execute("INSERT INTO plantgrowth (plantid, username) VALUES ((SELECT plantid FROM plants WHERE name = ?), ?)", [plant, session["username"]]) # Insert row for plant associated with user
+            con.commit()
+        return redirect("/plants")
 
 @app.route("/searchplants", methods=["POST"])
 @login_required
 def plantsearch():
     plants = []
-    plantsearch = request.json["planttype"]
+    plantsearch = request.json["planttype"] # Get JSON data for plant name
     with connect("plantapp.db") as con:
         db = con.cursor()
-        query = db.execute("SELECT name FROM plants WHERE name LIKE ?", ['%'+plantsearch+'%'])
-        for row in query:
+        query = db.execute("SELECT name FROM plants WHERE name LIKE ?", ['%'+plantsearch+'%']) # Select plants containing matching string
+        for row in query: # Add plants to array
             plants.append({"name": row[0]})
         con.commit()
-        print(plants)
     return {"response": plants}
