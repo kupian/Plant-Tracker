@@ -32,6 +32,10 @@ def login():
     if request.method == "POST":
         username = request.form.get("l_username")
         password = request.form.get("l_password")
+        if len(username) < 1:
+            return redirect("/")
+        if len(password) < 1:
+            return redirect("/")
         with connect("plantapp.db") as con:
             db = con.cursor()
             query = db.execute("SELECT password FROM users WHERE username = ?", [username])
@@ -81,3 +85,32 @@ def register():
 def logout():
     session.clear()
     return redirect("/")
+
+@app.route("/plants", methods=["GET", "POST"])
+@login_required
+def plants():
+    if request.method == "GET":
+        plants = []
+        with connect("plantapp.db") as con:
+            db = con.cursor()
+            query = db.execute("SELECT name FROM plants WHERE plantid = (SELECT plantid FROM plantgrowth WHERE username=?)", [session["username"]])
+            for row in query:
+                plants.append(row)
+            con.commit()
+        return render_template("plants.html", plants=plants, username=session["username"])
+    else:
+        return redirect("/")
+
+@app.route("/searchplants", methods=["POST"])
+@login_required
+def plantsearch():
+    plants = []
+    plantsearch = request.json["planttype"]
+    with connect("plantapp.db") as con:
+        db = con.cursor()
+        query = db.execute("SELECT name FROM plants WHERE name LIKE ?", ['%'+plantsearch+'%'])
+        for row in query:
+            plants.append({"name": row[0]})
+        con.commit()
+        print(plants)
+    return {"response": plants}

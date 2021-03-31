@@ -13,10 +13,11 @@ def connect(path):
 
     return connection
 
+# Decorator function taken from flask documentation
 def login_required(f):
     @wraps(f)
     def decorated_function(*args, **kwargs):
-        if session.get["user_id"] is None:
-            return redirect(url_for('login', next=request.url))
+        if "username" not in session:
+            return redirect("/")
         return f(*args, **kwargs)
     return decorated_function

@@ -1,0 +1,101 @@
+{% extends "layout.html" %}
+
+    {% block main %}
+
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-sm">
+                
+            </div>
+            <div class="col-sm">
+                <h1 class="display-1 text-center">My Plants</h1>
+            </div>
+            <div class="col-sm">
+                
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-sm">
+
+            </div>
+            <div class="col-sm">
+                <form class="form" id="popup">
+                        <div>
+                            <input class="form-control" type="text" name="planttype" placeholder="Plant Type" id="plantsearch">
+                        </div>
+                        <div class="mb-3" id="options">
+                        </div>
+                </form>
+            </div>
+            <div class="col-sm">
+
+            </div>
+        </div>
+        
+        {% for i in range (0, plants|length, 2) %}
+
+            <div class="row text-center">
+                <div class="col-sm">
+                    <h2>
+                        {{plants[i]}}
+                    </h2>       
+                </div>
+                <div class="col-sm">
+                    {% if plants|length > i+1 %}
+                        <h2>
+                            {{plants[i+1]}}
+                        </h2> 
+                    {% endif %}
+                </div>    
+            </div>
+        {% endfor %}
+
+    </div>
+
+    <script>
+
+        function showOptions(json) {
+            for (let i = 0; i < json["response"].length; i++) {
+                let name = json["response"][i]["name"];
+                $("#options").append(" <button class='mt-3 form-control' type='button'>" + name + "</button>");
+            }
+        }
+
+        $(document).ready(function() {
+
+            $(".plantoption").click(function(){
+                console.log("click");
+                $("#options").css('display', 'none');
+            })
+
+            $("#plantsearch").keyup(function() {
+                if ($("#plantsearch").val().length == 0)
+                {
+                    console.log("eee");
+                    $("#options").empty();
+                    $("#options").css('display', 'none');
+                }
+                else {
+                    $("#options").css('display', 'inline-block');
+                    $(".form-control").css('display', 'block');
+                    $.ajax({
+                    url: '/searchplants',
+                    type: 'POST',
+                    data: JSON.stringify({"planttype": $("#plantsearch").val()}),
+                    contentType: 'application/json',
+                    success: function(json)
+                    {
+                        console.log(json);
+                        $("#options").empty();
+                        showOptions(json);
+                    }
+                    })
+                }   
+            })
+        })
+
+        
+    </script>
+
+{% endblock %}}
